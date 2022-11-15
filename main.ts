@@ -24,16 +24,6 @@ async function main() {
       .join(" ")
   );
   lines.forEach((l) => console.log(l));
-  {
-    //blah
-    const x = 8;
-    const y = 1;
-    for (var ch = 1; ch <= 4; ch++) {
-      console.log(
-        `at ${x}, ${y}, ${ch}: ` + JSON.stringify(pixels.get(x, y, ch))
-      );
-    }
-  }
 }
 
 main();
