@@ -16,7 +16,7 @@ async function main() {
   const width = pixels.shape[0];
   const height = pixels.shape[1];
 
-  const alpha = pixels.pick(null, null, 4); // the fourth channel
+  const alpha = pixels.pick(null, null, 3); // the fourth channel
   const lines = range(0, height).map((y) =>
     range(0, width)
       .map((x) => alpha.get(x, y))
