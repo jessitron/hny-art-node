@@ -70,35 +70,23 @@ async function main() {
     })
     .flat();
 
-  type HrTime = [number, number];
-  const begin = Date.now() / 1000; // sec since epoch
-  var startTime: HrTime = [begin + 10, 0];
-  tracer
-    .startSpan("test ingest timestamp, positive offset", {
-      startTime,
-      attributes: { begin, sent_timestamp: startTime },
-    })
-    .end();
+  type SecondsSinceEpoch = number;
+  type Nanoseconds = number;
+  type HrTime = [SecondsSinceEpoch, Nanoseconds];
+  const begin: Nanoseconds = Date.now() / 1000; // sec since epoch. first element in HrTime
 
-  startTime = [begin - 10, 0];
-  tracer
-    .startSpan("test ingest timestamp, negative offset", {
-      startTime,
-      attributes: { begin, sent_timestamp: startTime },
-    })
-    .end();
+  tracer.startActiveSpan("Once upon a time", (rootSpan) => {
+    spanSpecs.forEach((ss) => {
+      const startTime: HrTime = [begin + ss.time_delta, 0];
+      const s = tracer.startSpan("dot", {
+        startTime,
+        attributes: ss,
+      });
+      s.end();
+    });
 
-  // tracer.startActiveSpan("Once upon a time", (rootSpan) => {
-  //   spanSpecs.forEach((ss) => {
-  //     const s = tracer.startSpan("dot", {
-  //       startTime: begin + ss.time_delta * 1000,
-  //       attributes: ss,
-  //     });
-  //     s.end();
-  //   });
-
-  //   rootSpan.end();
-  // });
+    rootSpan.end();
+  });
 }
 
 main();
