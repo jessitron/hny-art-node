@@ -21,9 +21,6 @@ sdk.start();
 import otel from "@opentelemetry/api";
 const tracer = otel.trace.getTracer("i did this on purpose");
 
-const { DiagConsoleLogger, DiagLogLevel, diag } = require("@opentelemetry/api");
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
-
 type SpanSpec = {
   x: number;
   y: number;
