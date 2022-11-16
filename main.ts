@@ -7,13 +7,23 @@ import { readImage } from "./image";
 
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
+import {
+  SimpleSpanProcessor,
+  ConsoleSpanExporter,
+  BatchSpanProcessor,
+} from "@opentelemetry/sdk-trace-base"
 
 // The Trace Exporter exports the data to Honeycomb and uses
 // the environment variables for endpoint, service name, and API Key.
-const traceExporter = new OTLPTraceExporter();
+const traceExporter = new OTLPTraceExporter({});
 
 const sdk = new NodeSDK({
-  traceExporter,
+  spanProcessor: new BatchSpanProcessor(traceExporter,
+  {
+    scheduledDelayMillis: 500,
+    maxQueueSize: 16000,
+    maxExportBatchSize: 1000,
+  }),
 });
 
 sdk.start();
@@ -36,7 +46,7 @@ async function main() {
   const maxWidth = Math.max(...xs);
   const maxHeight = Math.max(...points.map((p) => p.y));
 
-  const bluenesses = [...new Set(points.map((p) => p.blueness))].sort();
+  const bluenesses = [...new Set(points.map((p) => p.blueness + p.redness + p.greenness))].sort();
   console.log(
     `There are ${bluenesses.length} different bluenesses: ` +
       JSON.stringify(bluenesses)
@@ -63,9 +73,12 @@ async function main() {
           time_delta: p.x - maxWidth,
           height: maxHeight - p.y,
           spans_at_once,
+          error: p.redness > 140,
         }));
     })
     .flat();
+
+  console.log(`this should send ${spanSpecs.length} spans`);
 
   type SecondsSinceEpoch = number;
   type Nanoseconds = number;
@@ -74,14 +87,14 @@ async function main() {
 
   tracer.startActiveSpan("Once upon a time", (rootSpan) => {
     spanSpecs.forEach((ss) => {
-      const startTime: HrTime = [begin + ss.time_delta, 0];
+      const startTime: HrTime = [begin + ss.time_delta * 5, 0];
       const s = tracer.startSpan("dot", {
         startTime,
         attributes: ss,
       });
       s.end();
     });
-
+    console.log("Trace ID is: " + rootSpan.spanContext().traceId);
     rootSpan.end();
   });
 }
@@ -89,4 +102,6 @@ async function main() {
 main();
 console.log("did some stuff");
 
-setTimeout(() => console.log("hopefully they've all been sent"), 10000);
+sdk.shutdown();
+
+setTimeout(() => console.log("hopefully they've all been sent"), 20000);

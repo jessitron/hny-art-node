@@ -10,7 +10,7 @@ function range(from: number, to: number): ReadonlyArray<number> {
 }
 
 export async function readImage() {
-  const pixels = await readPng("./hatskirt.png");
+  const pixels = await readPng("./sad-sad-colors.png");
   const width = pixels.shape[0];
   const height = pixels.shape[1];
 
@@ -24,17 +24,17 @@ export async function readImage() {
   // lines.forEach((l) => console.log(l));
 
   const bluePoints = range(0, height)
-    .map((y) =>
-      range(0, width)
-        .map((x) => ({
+    .map(
+      (y) =>
+        range(0, width).map((x) => ({
           x,
           y,
-          redness: pixels.get(x, y, 1),
-          greenness: pixels.get(x, y, 2),
-          blueness: pixels.get(x, y, 3),
+          redness: pixels.get(x, y, 2),
+          greenness: pixels.get(x, y, 3),
+          blueness: pixels.get(x, y, 1),
           alpha: pixels.get(x, y, 4),
         }))
-        .filter((b) => b.blueness > 0)
+      // .filter((b) => b.blueness > 0)
     )
     .flat();
   console.log(JSON.stringify(bluePoints));
