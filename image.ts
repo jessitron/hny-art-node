@@ -33,7 +33,6 @@ export async function readImage() {
           greenness: pixels.get(x, y, 2),
           blueness: pixels.get(x, y, 3),
           alpha: pixels.get(x, y, 4),
-          zeroth_channel: pixels.get(x, y, 0),
         }))
         .filter((b) => b.blueness > 0)
     )
