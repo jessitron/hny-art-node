@@ -15,18 +15,26 @@ export async function readImage() {
   const height = pixels.shape[1];
 
   const alpha = pixels.pick(null, null, 3); // the fourth channel
-  const lines = range(0, height).map((y) =>
-    range(0, width)
-      .map((x) => alpha.get(x, y))
-      .map((n) => ("" + n).padStart(3, " "))
-      .join(" ")
-  );
-  lines.forEach((l) => console.log(l));
+  // const lines = range(0, height).map((y) =>
+  //   range(0, width)
+  //     .map((x) => alpha.get(x, y))
+  //     .map((n) => ("" + n).padStart(3, " "))
+  //     .join(" ")
+  // );
+  // lines.forEach((l) => console.log(l));
 
   const bluePoints = range(0, height)
     .map((y) =>
       range(0, width)
-        .map((x) => ({ x, y, blueness: alpha.get(x, y) }))
+        .map((x) => ({
+          x,
+          y,
+          redness: pixels.get(x, y, 1),
+          greenness: pixels.get(x, y, 2),
+          blueness: pixels.get(x, y, 3),
+          alpha: pixels.get(x, y, 4),
+          zeroth_channel: pixels.get(x, y, 0),
+        }))
         .filter((b) => b.blueness > 0)
     )
     .flat();

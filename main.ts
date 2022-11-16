@@ -60,7 +60,7 @@ async function main() {
         .fill(0)
         .map((_) => ({
           ...p,
-          time_delta: maxWidth - p.x,
+          time_delta: p.x - maxWidth,
           height: maxHeight - p.y,
           spans_at_once,
         }));
