@@ -21,6 +21,9 @@ sdk.start();
 import otel from "@opentelemetry/api";
 const tracer = otel.trace.getTracer("i did this on purpose");
 
+const { DiagConsoleLogger, DiagLogLevel, diag } = require("@opentelemetry/api");
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
+
 type SpanSpec = {
   x: number;
   y: number;
@@ -67,18 +70,35 @@ async function main() {
     })
     .flat();
 
-  const begin = Date.now(); // millis since epoch
-  tracer.startActiveSpan("Once upon a time", (rootSpan) => {
-    spanSpecs.forEach((ss) => {
-      const s = tracer.startSpan("dot", {
-        startTime: begin + ss.time_delta * 1000,
-        attributes: ss,
-      });
-      s.end();
-    });
+  type HrTime = [number, number];
+  const begin = Date.now() / 1000; // sec since epoch
+  var startTime: HrTime = [begin + 10, 0];
+  tracer
+    .startSpan("test ingest timestamp, positive offset", {
+      startTime,
+      attributes: { begin, sent_timestamp: startTime },
+    })
+    .end();
 
-    rootSpan.end();
-  });
+  startTime = [begin - 10, 0];
+  tracer
+    .startSpan("test ingest timestamp, negative offset", {
+      startTime,
+      attributes: { begin, sent_timestamp: startTime },
+    })
+    .end();
+
+  // tracer.startActiveSpan("Once upon a time", (rootSpan) => {
+  //   spanSpecs.forEach((ss) => {
+  //     const s = tracer.startSpan("dot", {
+  //       startTime: begin + ss.time_delta * 1000,
+  //       attributes: ss,
+  //     });
+  //     s.end();
+  //   });
+
+  //   rootSpan.end();
+  // });
 }
 
 main();
