@@ -42,22 +42,17 @@ async function main(imageFile: string) {
   const pixels = readImage(imageFile);
   const allPixels = pixels.all().filter((p) => p.color.total() > 0);
 
-  const bluenesses = [...new Set(allPixels.map((p) => p.color.total()))].sort();
-  console.log(
-    `There are ${bluenesses.length} different bluenesses: ` +
-      JSON.stringify(bluenesses)
-  );
+  const bluenesses = allPixels.map((p) => p.color.total());
   const maxBlueness = Math.max(...bluenesses);
   const bluenessWidth = maxBlueness - Math.min(...bluenesses);
   const maxSpansAtOnePoint = 10.0;
-  const increaseInSpansPerBlueness = maxSpansAtOnePoint / bluenessWidth;
+  const increaseInSpansPerBlueness = (maxSpansAtOnePoint - 1) / bluenessWidth;
   console.log(
     "Let's increase blueness by " + increaseInSpansPerBlueness + " per"
   );
   const spansForBlueness = (b: number) =>
     maxSpansAtOnePoint -
-    Math.round((maxBlueness - b) * increaseInSpansPerBlueness) +
-    1;
+    Math.round((maxBlueness - b) * increaseInSpansPerBlueness);
 
   const spanSpecs: SpanSpec[] = allPixels
     .map((p) => {
