@@ -1,2 +1,2 @@
 source .env
-npm start
+npm start $*

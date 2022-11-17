@@ -66,8 +66,8 @@ class Pixels {
   }
 }
 
-export function readImage() {
-  const pixels = new Pixels(readPng("./bitty.png"));
+export function readImage(imageFile: string) {
+  const pixels = new Pixels(readPng(imageFile));
 
   console.log("alpha:")
   printLines(pixels, (p) => p.color.alpha);

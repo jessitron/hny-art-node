@@ -18,14 +18,14 @@ diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
 // The Trace Exporter exports the data to Honeycomb and uses
 // the environment variables for endpoint, service name, and API Key.
-const traceExporter = new OTLPTraceExporter( );
+const traceExporter = new OTLPTraceExporter();
 
 const sdk = new NodeSDK({
   spanProcessor: new BatchSpanProcessor(traceExporter, {
     scheduledDelayMillis: 500,
     maxQueueSize: 16000,
     maxExportBatchSize: 1000,
-  })
+  }),
 });
 
 import otel from "@opentelemetry/api";
@@ -37,15 +37,12 @@ type SpanSpec = {
   spans_at_once: number;
 };
 
-async function main() {
-
-await sdk.start();
-  const pixels = readImage();
+async function main(imageFile: string) {
+  await sdk.start();
+  const pixels = readImage(imageFile);
   const allPixels = pixels.all();
 
-  const bluenesses = [
-    ...new Set(allPixels.map((p) => p.color.total())),
-  ].sort();
+  const bluenesses = [...new Set(allPixels.map((p) => p.color.total()))].sort();
   console.log(
     `There are ${bluenesses.length} different bluenesses: ` +
       JSON.stringify(bluenesses)
@@ -98,7 +95,10 @@ await sdk.start();
   });
 }
 
-main();
+const imageFile = process.argv[2] || "hatskirt.png";
+console.log("reading image from: " + imageFile);
+
+main(imageFile);
 console.log("did some stuff");
 
 sdk.shutdown();
