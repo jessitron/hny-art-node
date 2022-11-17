@@ -15,7 +15,7 @@ import {
 
 // The Trace Exporter exports the data to Honeycomb and uses
 // the environment variables for endpoint, service name, and API Key.
-const traceExporter = new OTLPTraceExporter({});
+const traceExporter = new OTLPTraceExporter();
 
 const sdk = new NodeSDK({
   spanProcessor: new BatchSpanProcessor(traceExporter, {
