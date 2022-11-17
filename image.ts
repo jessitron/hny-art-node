@@ -23,7 +23,10 @@ class Color {
   ) {}
 
   public total() {
-    return ((this.red + this.blue + this.green) * this.alpha) / 255.0; // maybe reduce if alpha is low? * alpha/255 ?
+    return (
+      ((255 - this.red + 255 - this.blue + 255 - this.green) * this.alpha) /
+      255.0
+    ); // maybe reduce if alpha is low? * alpha/255 ?
   }
 }
 
