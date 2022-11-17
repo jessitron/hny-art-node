@@ -11,15 +11,14 @@ import {
   SimpleSpanProcessor,
   ConsoleSpanExporter,
   BatchSpanProcessor,
-} from "@opentelemetry/sdk-trace-base"
+} from "@opentelemetry/sdk-trace-base";
 
 // The Trace Exporter exports the data to Honeycomb and uses
 // the environment variables for endpoint, service name, and API Key.
 const traceExporter = new OTLPTraceExporter({});
 
 const sdk = new NodeSDK({
-  spanProcessor: new BatchSpanProcessor(traceExporter,
-  {
+  spanProcessor: new BatchSpanProcessor(traceExporter, {
     scheduledDelayMillis: 500,
     maxQueueSize: 16000,
     maxExportBatchSize: 1000,
@@ -32,21 +31,18 @@ import otel from "@opentelemetry/api";
 const tracer = otel.trace.getTracer("i did this on purpose");
 
 type SpanSpec = {
-  x: number;
-  y: number;
-  blueness: number;
   time_delta: number;
   height: number;
   spans_at_once: number;
 };
 
 async function main() {
-  const points = await readImage();
-  const xs = points.map((p) => p.x);
-  const maxWidth = Math.max(...xs);
-  const maxHeight = Math.max(...points.map((p) => p.y));
+  const pixels = readImage();
+  const allPixels = pixels.all();
 
-  const bluenesses = [...new Set(points.map((p) => p.blueness + p.redness + p.greenness))].sort();
+  const bluenesses = [
+    ...new Set(allPixels.map((p) => p.color.total())),
+  ].sort();
   console.log(
     `There are ${bluenesses.length} different bluenesses: ` +
       JSON.stringify(bluenesses)
@@ -63,17 +59,17 @@ async function main() {
     Math.round((maxBlueness - b) * increaseInSpansPerBlueness) +
     1;
 
-  const spanSpecs: SpanSpec[] = points
+  const spanSpecs: SpanSpec[] = allPixels
     .map((p) => {
-      const spans_at_once = spansForBlueness(p.blueness);
+      const spans_at_once = spansForBlueness(p.color.total());
       return Array(spans_at_once)
         .fill(0)
         .map((_) => ({
           ...p,
-          time_delta: p.x - maxWidth,
-          height: maxHeight - p.y,
+          time_delta: p.location.x - pixels.width,
+          height: pixels.height - p.location.y,
           spans_at_once,
-          error: p.redness > 140,
+          error: p.color.red > 140,
         }));
     })
     .flat();

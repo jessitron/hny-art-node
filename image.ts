@@ -1,43 +1,93 @@
-import p from "get-pixels";
-import { promisify } from "util";
+import { PNG, PNGWithMetadata } from "pngjs";
+import fs from "fs";
 
-async function readPng(location: string) {
-  return promisify(p)(location, "image/png");
+function readPng(location: string): PNGWithMetadata {
+  var data = fs.readFileSync(location);
+  return PNG.sync.read(data);
 }
 
 function range(from: number, to: number): ReadonlyArray<number> {
   return [...Array(to - from).keys()].map((i) => i + from);
 }
 
-export async function readImage() {
-  const pixels = await readPng("./sad-sad-colors.png");
-  const width = pixels.shape[0];
-  const height = pixels.shape[1];
+type ZeroTo255 = number; // from 0 to 255
 
-  const alpha = pixels.pick(null, null, 3); // the fourth channel
-  // const lines = range(0, height).map((y) =>
-  //   range(0, width)
-  //     .map((x) => alpha.get(x, y))
-  //     .map((n) => ("" + n).padStart(3, " "))
-  //     .join(" ")
-  // );
-  // lines.forEach((l) => console.log(l));
+type Location = { x: number; y: number };
 
-  const bluePoints = range(0, height)
-    .map(
-      (y) =>
-        range(0, width).map((x) => ({
-          x,
-          y,
-          redness: pixels.get(x, y, 2),
-          greenness: pixels.get(x, y, 3),
-          blueness: pixels.get(x, y, 1),
-          alpha: pixels.get(x, y, 4),
-        }))
-      // .filter((b) => b.blueness > 0)
-    )
-    .flat();
-  console.log(JSON.stringify(bluePoints));
+class Color {
+  constructor(
+    public red: ZeroTo255,
+    public green: ZeroTo255,
+    public blue: ZeroTo255,
+    public alpha: ZeroTo255
+  ) {}
 
-  return bluePoints;
+  public total() {
+    return this.red + this.blue + this.green; // maybe reduce if alpha is low? * alpha/255 ?
+  }
+}
+
+type Pixel = { location: Location; color: Color };
+
+// https://github.com/lukeapage/pngjs#example
+class Pixels {
+  public readonly width: number;
+  public readonly height: number;
+  constructor(private png: PNGWithMetadata) {
+    if (png.colorType !== 6) {
+      throw new Error(
+        "Only RGBA color type is supported. Expected colorType 6; got ${png.colorType}, whatever that means."
+      );
+    }
+    this.width = png.width;
+    this.height = png.height;
+  }
+
+  private static readonly RED_CHANNEL = 0;
+
+  private static readonly GREEN_CHANNEL = 1;
+  private static readonly BLUE_CHANNEL = 2;
+  private static readonly ALPHA_CHANNEL = 3;
+
+  public at(x: number, y: number) {
+    const idx = (this.width * y + x) << 2; // why bitshift by 2? is this different from multiplying by 4, for the number of channels? I think the examples are being too clever
+    const red = this.png.data[idx + Pixels.RED_CHANNEL];
+    const blue = this.png.data[idx + Pixels.BLUE_CHANNEL];
+    const green = this.png.data[idx + Pixels.GREEN_CHANNEL];
+    const alpha = this.png.data[idx + Pixels.ALPHA_CHANNEL];
+
+    return { location: { x, y }, color: new Color(red, green, blue, alpha) };
+  }
+
+  public all(): Pixel[] {
+    return range(0, this.height)
+      .map((y) => range(0, this.width).map((x) => this.at(x, y)))
+      .flat();
+  }
+}
+
+export function readImage() {
+  const pixels = new Pixels(readPng("./bitty.png"));
+
+  console.log("alpha:")
+  printLines(pixels, (p) => p.color.alpha);
+  console.log("Red:")
+  printLines(pixels, (p) => p.color.red);
+  console.log("Green:")
+  printLines(pixels, (p) => p.color.green);
+  console.log("Blue:")
+  printLines(pixels, (p) => p.color.blue);
+  // printLines(pixels, (p) => p.location.x);
+
+  return pixels;
+}
+
+function printLines(pixels: Pixels, f: (p: Pixel) => number) {
+  const lines = range(0, pixels.height).map((y) =>
+    range(0, pixels.width)
+      .map((x) => f(pixels.at(x, y)))
+      .map((n) => ("" + n).padStart(3, " "))
+      .join(" ")
+  );
+  lines.forEach((l) => console.log(l));
 }
