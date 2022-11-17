@@ -40,7 +40,7 @@ type SpanSpec = {
 async function main(imageFile: string) {
   await sdk.start();
   const pixels = readImage(imageFile);
-  const allPixels = pixels.all();
+  const allPixels = pixels.all().filter((p) => p.color.total() > 0);
 
   const bluenesses = [...new Set(allPixels.map((p) => p.color.total()))].sort();
   console.log(
@@ -65,7 +65,7 @@ async function main(imageFile: string) {
       return Array(spans_at_once)
         .fill(0)
         .map((_) => ({
-          ...p,
+          ...p.asFlatJson(),
           time_delta: p.location.x - pixels.width,
           height: pixels.height - p.location.y,
           spans_at_once,

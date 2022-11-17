@@ -23,11 +23,20 @@ class Color {
   ) {}
 
   public total() {
-    return this.red + this.blue + this.green; // maybe reduce if alpha is low? * alpha/255 ?
+    return ((this.red + this.blue + this.green) * this.alpha) / 255.0; // maybe reduce if alpha is low? * alpha/255 ?
   }
 }
 
-type Pixel = { location: Location; color: Color };
+class Pixel {
+  constructor(public location: Location, public color: Color) {}
+
+  public asFlatJson(): object {
+    return {
+      ...this.location,
+      ...this.color,
+    };
+  }
+}
 
 // https://github.com/lukeapage/pngjs#example
 class Pixels {
@@ -56,7 +65,7 @@ class Pixels {
     const green = this.png.data[idx + Pixels.GREEN_CHANNEL];
     const alpha = this.png.data[idx + Pixels.ALPHA_CHANNEL];
 
-    return { location: { x, y }, color: new Color(red, green, blue, alpha) };
+    return new Pixel({ x, y }, new Color(red, green, blue, alpha));
   }
 
   public all(): Pixel[] {
@@ -69,13 +78,13 @@ class Pixels {
 export function readImage(imageFile: string) {
   const pixels = new Pixels(readPng(imageFile));
 
-  console.log("alpha:")
+  console.log("alpha:");
   printLines(pixels, (p) => p.color.alpha);
-  console.log("Red:")
+  console.log("Red:");
   printLines(pixels, (p) => p.color.red);
-  console.log("Green:")
+  console.log("Green:");
   printLines(pixels, (p) => p.color.green);
-  console.log("Blue:")
+  console.log("Blue:");
   printLines(pixels, (p) => p.color.blue);
   // printLines(pixels, (p) => p.location.x);
 
