@@ -54,6 +54,10 @@ async function main(imageFile: string) {
     maxSpansAtOnePoint -
     Math.round((maxBlueness - b) * increaseInSpansPerBlueness);
 
+  const KnownGoodNumberOfPixels = 48;
+  const KnownHeightValueThatLooksGood = 40;
+  const imageHeight = Math.max(KnownGoodNumberOfPixels, pixels.height);
+  const predictedStepSize = KnownHeightValueThatLooksGood / imageHeight;
   const spanSpecs: SpanSpec[] = allPixels
     .map((p) => {
       const spans_at_once = spansForBlueness(p.color.total());
@@ -63,6 +67,8 @@ async function main(imageFile: string) {
           ...p.asFlatJson(),
           time_delta: p.location.x - pixels.width,
           height: pixels.height - p.location.y,
+          i_swear_this_is_a_float:
+            (pixels.height - p.location.y) * predictedStepSize,
           spans_at_once,
           error: p.color.red > 140,
         }));
