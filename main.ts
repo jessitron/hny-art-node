@@ -68,7 +68,7 @@ async function main(imageFile: string) {
           time_delta: p.location.x - pixels.width,
           height_int: pixels.height - p.location.y,
           height:
-            (pixels.height - p.location.y) * predictedStepSize * .99,
+            (pixels.height - p.location.y) * predictedStepSize * .99, // make it noninteger, so hny knows this is a float field
           spans_at_once,
           error: p.color.red > 140,
         }));
