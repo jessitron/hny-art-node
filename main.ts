@@ -66,9 +66,9 @@ async function main(imageFile: string) {
         .map((_) => ({
           ...p.asFlatJson(),
           time_delta: p.location.x - pixels.width,
-          height: pixels.height - p.location.y,
-          i_swear_this_is_a_float:
-            (pixels.height - p.location.y) * predictedStepSize,
+          height_int: pixels.height - p.location.y,
+          height:
+            (pixels.height - p.location.y) * predictedStepSize * .99,
           spans_at_once,
           error: p.color.red > 140,
         }));
