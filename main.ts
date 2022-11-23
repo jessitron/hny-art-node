@@ -15,7 +15,7 @@ type SpanSpec = {
 };
 
 type CountOfSpans = number; // 0 to maxSpansAtOnePoint
-function approximateColorByNumberOfSpans(allPixels: Pixel[]): (d: Darkness) => CountOfSpans { 
+function approximateColorByNumberOfSpans(allPixels: Pixel[]): (d: Darkness) => CountOfSpans {
 
   const bluenesses = allPixels.map((p) => p.color.darkness());
   const maxBlueness = Math.max(...bluenesses);
@@ -34,17 +34,29 @@ function approximateColorByNumberOfSpans(allPixels: Pixel[]): (d: Darkness) => C
     Math.round((maxBlueness - b) * increaseInSpansPerBlueness);
 }
 
+type RowInPng = number; // distance from the top of the png, in pixels. Int
+type HeatmapHeight = number; // the height we should heatmap on. float. NEVER a whole number
+function placeVerticallyInBuckets(pixels: Pixels): (y: RowInPng) => HeatmapHeight {
+
+  const KnownGoodNumberOfPixels = 48;
+  const KnownHeightValueThatLooksGood = 40;
+  const imageHeight = Math.max(KnownGoodNumberOfPixels, pixels.height);
+  var predictedStepSize = KnownHeightValueThatLooksGood / imageHeight;
+  // really, what I know now is: stepSize is likely to be 0.83886
+
+  // experimenting
+  predictedStepSize = 1;
+  return (y) => (pixels.height - y) * predictedStepSize + 0.01
+}
+
 async function main(imageFile: string) {
   await sdk.start();
   const pixels = readImage(imageFile);
   const allPixels = pixels.all().filter((p) => p.color.darkness() > 0);
 
   const spansForBlueness = approximateColorByNumberOfSpans(allPixels);
+  const heatmapHeight = placeVerticallyInBuckets(pixels);
 
-  const KnownGoodNumberOfPixels = 48;
-  const KnownHeightValueThatLooksGood = 40;
-  const imageHeight = Math.max(KnownGoodNumberOfPixels, pixels.height);
-  const predictedStepSize = KnownHeightValueThatLooksGood / imageHeight;
   const spanSpecs: SpanSpec[] = allPixels
     .map((p) => {
       const spans_at_once = spansForBlueness(p.color.darkness());
@@ -54,7 +66,7 @@ async function main(imageFile: string) {
           ...p.asFlatJson(),
           time_delta: p.location.x - pixels.width,
           height_int: pixels.height - p.location.y,
-          height: (pixels.height - p.location.y) * predictedStepSize + 0.01, // make it noninteger, so hny knows this is a float field
+          height: heatmapHeight(p.location.y), // make it noninteger, so hny knows this is a float field
           spans_at_once,
           error: p.color.red > 140,
         }));
