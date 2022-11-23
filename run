@@ -1,2 +1,12 @@
+#!/bin/bash
+
 source .env
+
+if [[ -z "$HONEYCOMB_API_KEY" ]]; then
+   echo "   Please define HONEYCOMB_API_KEY.
+   Your API key will need permissions to: 'Send Events' and 'Create Datasets'
+   More info: https://docs.honeycomb.io/getting-data-in/api-keys/#find-api-keys"
+   exit 1
+fi
+
 npm start $*
