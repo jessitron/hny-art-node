@@ -1,5 +1,5 @@
 console.log("Greetings from Typescript");
-import "./tracing"
+import { sdk } from "./tracing"
 import { readImage } from "./image";
 
 // tracing.js
@@ -15,7 +15,7 @@ type SpanSpec = {
 };
 
 async function main(imageFile: string) {
-  //await sdk.start();
+  await sdk.start();
   const pixels = readImage(imageFile);
   const allPixels = pixels.all().filter((p) => p.color.total() > 0);
 
