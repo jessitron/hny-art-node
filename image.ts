@@ -11,6 +11,7 @@ function range(from: number, to: number): ReadonlyArray<number> {
 }
 
 type ZeroTo255 = number; // from 0 to 255
+export type Darkness = number; // 0 to 255*3
 
 type Location = { x: number; y: number };
 
@@ -20,18 +21,19 @@ class Color {
     public green: ZeroTo255,
     public blue: ZeroTo255,
     public alpha: ZeroTo255
-  ) {}
+  ) { }
 
-  public total() {
+  public darkness(): number {
+    // all the colors' distance from white; reduced if not fully opaque
     return (
-      ((255 - this.red + 255 - this.blue + 255 - this.green) * this.alpha) /
-      255.0
-    ); // maybe reduce if alpha is low? * alpha/255 ?
+      (255 - this.red + 255 - this.blue + 255 - this.green) * (this.alpha /
+        255.0)
+    );
   }
 }
 
-class Pixel {
-  constructor(public location: Location, public color: Color) {}
+export class Pixel {
+  constructor(public location: Location, public color: Color) { }
 
   public asFlatJson(): object {
     return {
@@ -42,7 +44,7 @@ class Pixel {
 }
 
 // https://github.com/lukeapage/pngjs#example
-class Pixels {
+export class Pixels {
   public readonly width: number;
   public readonly height: number;
   constructor(private png: PNGWithMetadata) {

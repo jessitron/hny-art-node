@@ -1,6 +1,6 @@
 console.log("Greetings from Typescript");
 import { sdk } from "./tracing"
-import { readImage } from "./image";
+import { Darkness, Pixel, Pixels, readImage } from "./image";
 
 // tracing.js
 ("use strict");
@@ -14,22 +14,32 @@ type SpanSpec = {
   spans_at_once: number;
 };
 
-async function main(imageFile: string) {
-  await sdk.start();
-  const pixels = readImage(imageFile);
-  const allPixels = pixels.all().filter((p) => p.color.total() > 0);
+type CountOfSpans = number; // 0 to maxSpansAtOnePoint
+function approximateColorByNumberOfSpans(allPixels: Pixel[]): (d: Darkness) => CountOfSpans { 
 
-  const bluenesses = allPixels.map((p) => p.color.total());
+  const bluenesses = allPixels.map((p) => p.color.darkness());
   const maxBlueness = Math.max(...bluenesses);
   const bluenessWidth = maxBlueness - Math.min(...bluenesses);
+  if (bluenessWidth === 0) {
+    // there is only one color. We only ever need to send 1 span.
+    return (d) => 1;
+  }
   const maxSpansAtOnePoint = 10.0;
-  const increaseInSpansPerBlueness = (maxSpansAtOnePoint - 1) / bluenessWidth;
+  const increaseInSpansPerBlueness = bluenessWidth === 0 ? 1 : (maxSpansAtOnePoint - 1) / bluenessWidth;
   console.log(
     "Let's increase blueness by " + increaseInSpansPerBlueness + " per"
   );
-  const spansForBlueness = (b: number) =>
+  return (b: Darkness) =>
     maxSpansAtOnePoint -
     Math.round((maxBlueness - b) * increaseInSpansPerBlueness);
+}
+
+async function main(imageFile: string) {
+  await sdk.start();
+  const pixels = readImage(imageFile);
+  const allPixels = pixels.all().filter((p) => p.color.darkness() > 0);
+
+  const spansForBlueness = approximateColorByNumberOfSpans(allPixels);
 
   const KnownGoodNumberOfPixels = 48;
   const KnownHeightValueThatLooksGood = 40;
@@ -37,14 +47,14 @@ async function main(imageFile: string) {
   const predictedStepSize = KnownHeightValueThatLooksGood / imageHeight;
   const spanSpecs: SpanSpec[] = allPixels
     .map((p) => {
-      const spans_at_once = spansForBlueness(p.color.total());
+      const spans_at_once = spansForBlueness(p.color.darkness());
       return Array(spans_at_once)
         .fill(0)
         .map((_) => ({
           ...p.asFlatJson(),
           time_delta: p.location.x - pixels.width,
-          height_int: imageHeight - p.location.y,
-          height: (imageHeight - p.location.y) * predictedStepSize + 0.01, // make it noninteger, so hny knows this is a float field
+          height_int: pixels.height - p.location.y,
+          height: (pixels.height - p.location.y) * predictedStepSize + 0.01, // make it noninteger, so hny knows this is a float field
           spans_at_once,
           error: p.color.red > 140,
         }));

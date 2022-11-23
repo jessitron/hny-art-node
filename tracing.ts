@@ -10,4 +10,4 @@ const sdk = new HoneycombSDK({
 
 //sdk.start()
 
-export { sdk }
+export { sdk } // We need to manually await the start and trigger the stop, in this strange app
