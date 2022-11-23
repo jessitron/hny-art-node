@@ -66,9 +66,8 @@ async function main(imageFile: string) {
         .map((_) => ({
           ...p.asFlatJson(),
           time_delta: p.location.x - pixels.width,
-          height_int: pixels.height - p.location.y,
-          height:
-            (pixels.height - p.location.y) * predictedStepSize * .99, // make it noninteger, so hny knows this is a float field
+          height_int: imageHeight - p.location.y,
+          height: (imageHeight - p.location.y) * predictedStepSize + 0.01, // make it noninteger, so hny knows this is a float field
           spans_at_once,
           error: p.color.red > 140,
         }));
