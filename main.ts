@@ -1,6 +1,7 @@
 console.log("Greetings from Typescript");
 import { sdk } from "./tracing"
 import { Darkness, Pixel, Pixels, readImage } from "./image";
+import "./tracing"
 
 // tracing.js
 ("use strict");
@@ -14,8 +15,15 @@ type SpanSpec = {
   spans_at_once: number;
 };
 
+<<<<<<< HEAD
 type CountOfSpans = number; // 0 to maxSpansAtOnePoint
 function approximateColorByNumberOfSpans(allPixels: Pixel[]): (d: Darkness) => CountOfSpans {
+=======
+async function main(imageFile: string) {
+  //await sdk.start();
+  const pixels = readImage(imageFile);
+  const allPixels = pixels.all().filter((p) => p.color.total() > 0);
+>>>>>>> parent of 2e84291 (sdk)
 
   const bluenesses = allPixels.map((p) => p.color.darkness());
   const maxBlueness = Math.max(...bluenesses);
