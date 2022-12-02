@@ -13,12 +13,12 @@ if [[ -z "$HONEYCOMB_API_KEY" ]]; then
    Your API key will need permissions to: 'Send Events' and 'Create Datasets'
    Find your API key here: https://docs.honeycomb.io/getting-data-in/api-keys/#find-api-keys
    
-   Then put it in your environment."
+   Then put it in your environment: export HONEYCOMB_API_KEY=..."
    exit 1
 fi
 
 export OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-https://api.honeycomb.io/}
-export OTEL_EXPORTER_OTLP_HEADERS="x-honeycomb-team=$HONEYCOMB_API_KEY" 
-export HONEYCOMB_API_KEY
+export OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-viz-art}
+export OTEL_EXPORTER_OTLP_HEADERS="x-honeycomb-team=$HONEYCOMB_API_KEY"
 
 npm start $*
