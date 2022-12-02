@@ -6,7 +6,7 @@ import { readImage } from "./image";
 ("use strict");
 
 import { NodeSDK } from "@opentelemetry/sdk-node";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import {
   SimpleSpanProcessor,
   ConsoleSpanExporter,
