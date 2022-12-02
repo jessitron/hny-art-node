@@ -1,7 +1,11 @@
 #!/bin/bash
 
+if [[ ! -d node_modules ]]; then
+  npm install
+fi
+
 if [[ -e .env ]]; then
-   source .env
+  source .env
 fi
 
 if [[ -z "$HONEYCOMB_API_KEY" ]]; then
