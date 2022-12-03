@@ -60,6 +60,7 @@ async function main(imageFile: string) {
       return Array(spans_at_once)
         .fill(0)
         .map((_) => ({
+          // TODO: could I increase sample rate instead of sending more?
           ...p.asFlatJson(),
           time_delta: p.location.x - pixels.width,
           height_int: pixels.height - p.location.y,
@@ -96,6 +97,8 @@ console.log("reading image from: " + imageFile);
 
 main(imageFile);
 console.log("did some stuff");
+
+// TODO: print a link to the environment
 
 sdk.shutdown();
 
