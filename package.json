@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc && node main.js"
+    "start": "tsc && node main.js",
+    "useful-transformation": "tsc && node replaceLightWithTransparent.js"
   },
   "author": "",
   "license": "ISC",

@@ -15,7 +15,7 @@ export type Darkness = number; // 0 to 255*3
 
 type Location = { x: number; y: number };
 
-class Color {
+export class Color {
   constructor(
     public red: ZeroTo255,
     public green: ZeroTo255,
@@ -40,6 +40,10 @@ export class Pixel {
       ...this.location,
       ...this.color,
     };
+  }
+
+  public withColor(c: Color): Pixel {
+    return new Pixel(this.location, c);
   }
 }
 
