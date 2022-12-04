@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsc && node main.js",
-    "useful-transformation": "tsc && node replaceLightWithTransparent.js"
+    "useful-transformation": "tsc && node usefulTransformationOfTheMoment.js"
   },
   "author": "",
   "license": "ISC",
