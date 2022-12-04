@@ -131,7 +131,7 @@ main(imageFile);
 console.log("did some stuff");
 
 // TODO: print a link to the environment
-
+// TODO: send them from the left rather than from the top
 sdk.shutdown();
 
 setTimeout(() => console.log("hopefully they've all been sent"), 20000);
