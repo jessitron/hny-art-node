@@ -21,19 +21,19 @@ class Color {
     public green: ZeroTo255,
     public blue: ZeroTo255,
     public alpha: ZeroTo255
-  ) { }
+  ) {}
 
   public darkness(): number {
     // all the colors' distance from white; reduced if not fully opaque
     return (
-      (255 - this.red + 255 - this.blue + 255 - this.green) * (this.alpha /
-        255.0)
+      (255 - this.red + 255 - this.blue + 255 - this.green) *
+      (this.alpha / 255.0)
     );
   }
 }
 
 export class Pixel {
-  constructor(public location: Location, public color: Color) { }
+  constructor(public location: Location, public color: Color) {}
 
   public asFlatJson(): object {
     return {
@@ -78,19 +78,41 @@ export class Pixels {
       .map((y) => range(0, this.width).map((x) => this.at(x, y)))
       .flat();
   }
+
+  public overwrite(p: Pixel) {
+    const y = p.location.y;
+    const x = p.location.x;
+    const idx = (this.width * y + x) << 2; // why bitshift by 2? is this different from multiplying by 4, for the number of channels? I think the examples are being too clever
+    this.png.data[idx + Pixels.RED_CHANNEL] = p.color.red;
+    this.png.data[idx + Pixels.BLUE_CHANNEL] = p.color.blue;
+    this.png.data[idx + Pixels.GREEN_CHANNEL] = p.color.green;
+    this.png.data[idx + Pixels.ALPHA_CHANNEL] = p.color.alpha;
+  }
+
+  public writeToFile(filename: string) {
+    writeImage(this.png, filename);
+  }
+}
+
+function writeImage(png: PNG, filename: string) {
+  // Pack it back into a PNG data
+  let buff = PNG.sync.write(png);
+
+  // Write a PNG file
+  fs.writeFileSync(filename, buff);
 }
 
 export function readImage(imageFile: string) {
   const pixels = new Pixels(readPng(imageFile));
 
-  console.log("alpha:");
-  printLines(pixels, (p) => p.color.alpha);
-  console.log("Red:");
-  printLines(pixels, (p) => p.color.red);
-  console.log("Green:");
-  printLines(pixels, (p) => p.color.green);
-  console.log("Blue:");
-  printLines(pixels, (p) => p.color.blue);
+  // console.log("alpha:");
+  // printLines(pixels, (p) => p.color.alpha);
+  // console.log("Red:");
+  // printLines(pixels, (p) => p.color.red);
+  // console.log("Green:");
+  // printLines(pixels, (p) => p.color.green);
+  // console.log("Blue:");
+  // printLines(pixels, (p) => p.color.blue);
   // printLines(pixels, (p) => p.location.x);
 
   return pixels;
