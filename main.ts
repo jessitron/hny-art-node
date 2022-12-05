@@ -58,14 +58,7 @@ function placeVerticallyInBuckets(
       "WARNING: The picture is too short. Make its content 25-50 pixels high"
     );
   }
-  var predictedStepSize = findNextLargerAllowedStepSize(
-    imageHeightRange / 50.0
-  );
-  console.log("Predicted step size:" + predictedStepSize);
-  // stepSize is likely to be 0.83886. It is 0.0000001*2^24
-
-  // experimenting
-  // predictedStepSize = 1;
+  var predictedStepSize = 1.6777216; // this is just what it is. 0.0000001 * 2^24
   return (y) =>
     (imageHeight - y - imageBase + 0.5) * predictedStepSize + imageBase + 0.01;
 }
@@ -75,14 +68,6 @@ function placeHorizontallyInBucket(
   howFarToTheRight: number
 ): HrTime {
   return [begin + howFarToTheRight * Granularity, 0];
-}
-
-function findNextLargerAllowedStepSize(atLeastThisBig: number): number {
-  var stepSize = 0.0000001; // it always starts here
-  while (stepSize < atLeastThisBig) {
-    stepSize = stepSize * 2;
-  }
-  return stepSize;
 }
 
 async function main(imageFile: string) {
