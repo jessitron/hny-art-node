@@ -1,9 +1,10 @@
-console.log("Greetings from Typescript");
 import { sdk } from "./tracing";
 import { Darkness, Pixel, Pixels, readImage } from "./image";
 
 import otel from "@opentelemetry/api";
 const tracer = otel.trace.getTracer("i did this on purpose");
+
+console.log("Greetings! Here we go...");
 
 type CountOfSpans = number; // 0 to maxSpansAtOnePoint
 type SpanSpec = {
@@ -85,12 +86,10 @@ async function main(imageFile: string) {
       return Array(spans_at_once)
         .fill(0)
         .map((_) => ({
-          // TODO: could I increase sample rate instead of sending more? ... out of scope
-          ...p.asFlatJson(),
+          ...p.asFlatJson(), // add all the fields, for observability ;-)
           time_delta: p.location.x - pixels.width,
           height: heatmapHeight(p.location.y), // make it noninteger, so hny knows this is a float field
           spans_at_once,
-          // error: p.color.red > 140,
         }));
     })
     .flat();
