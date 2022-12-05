@@ -5,10 +5,11 @@ import { Darkness, Pixel, Pixels, readImage } from "./image";
 import otel from "@opentelemetry/api";
 const tracer = otel.trace.getTracer("i did this on purpose");
 
+type CountOfSpans = number; // 0 to maxSpansAtOnePoint
 type SpanSpec = {
   time_delta: number;
   height: number;
-  spans_at_once: number;
+  spans_at_once: CountOfSpans;
 };
 
 type SecondsSinceEpoch = number;
@@ -17,7 +18,6 @@ type Nanoseconds = number;
 type HrTime = [SecondsSinceEpoch, Nanoseconds];
 const Granularity: Seconds = 5;
 
-type CountOfSpans = number; // 0 to maxSpansAtOnePoint
 function approximateColorByNumberOfSpans(
   allPixels: Pixel[]
 ): (d: Darkness) => CountOfSpans {
@@ -76,6 +76,13 @@ function placeVerticallyInBuckets(
     (imageHeight - y - imageBase + 0.5) * predictedStepSize + imageBase + 0.01;
 }
 
+function placeHorizontallyInBucket(
+  begin: SecondsSinceEpoch,
+  howFarToTheRight: number
+): HrTime {
+  return [begin + howFarToTheRight * Granularity, 0];
+}
+
 function findNextLargerAllowedStepSize(atLeastThisBig: number): number {
   var stepSize = 0.0000001; // it always starts here
   while (stepSize < atLeastThisBig) {
@@ -115,9 +122,8 @@ async function main(imageFile: string) {
 
   tracer.startActiveSpan("Once upon a time", (rootSpan) => {
     spanSpecs.forEach((ss) => {
-      const startTime: HrTime = [begin + ss.time_delta * Granularity, 0];
       const s = tracer.startSpan("dot", {
-        startTime,
+        startTime: placeHorizontallyInBucket(begin, ss.time_delta),
         attributes: ss,
       });
       s.end();
