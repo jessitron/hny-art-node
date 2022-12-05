@@ -12,4 +12,4 @@ pixels.all().forEach((p) => {
   }
 });
 
-pixels.writeToFile("santa8.png");
+pixels.writeToFile("santa9.png");
