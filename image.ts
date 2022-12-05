@@ -83,6 +83,7 @@ export class Pixels {
       .flat();
   }
 
+  // use this if you want to change the PNG. It mutates the data in this class
   public overwrite(p: Pixel) {
     const y = p.location.y;
     const x = p.location.x;
@@ -93,6 +94,7 @@ export class Pixels {
     this.png.data[idx + Pixels.ALPHA_CHANNEL] = p.color.alpha;
   }
 
+  // and once you've changed it, maybe you want to save it
   public writeToFile(filename: string) {
     writeImage(this.png, filename);
   }

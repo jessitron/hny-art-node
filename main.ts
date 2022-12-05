@@ -11,6 +11,12 @@ type SpanSpec = {
   spans_at_once: number;
 };
 
+type SecondsSinceEpoch = number;
+type Seconds = number;
+type Nanoseconds = number;
+type HrTime = [SecondsSinceEpoch, Nanoseconds];
+const Granularity: Seconds = 5;
+
 type CountOfSpans = number; // 0 to maxSpansAtOnePoint
 function approximateColorByNumberOfSpans(
   allPixels: Pixel[]
@@ -105,14 +111,11 @@ async function main(imageFile: string) {
 
   console.log(`this should send ${spanSpecs.length} spans`);
 
-  type SecondsSinceEpoch = number;
-  type Nanoseconds = number;
-  type HrTime = [SecondsSinceEpoch, Nanoseconds];
-  const begin: Nanoseconds = Date.now() / 1000; // sec since epoch. first element in HrTime
+  const begin: SecondsSinceEpoch = Date.now() / 1000; // sec since epoch. first element in HrTime
 
   tracer.startActiveSpan("Once upon a time", (rootSpan) => {
     spanSpecs.forEach((ss) => {
-      const startTime: HrTime = [begin + ss.time_delta * 5, 0];
+      const startTime: HrTime = [begin + ss.time_delta * Granularity, 0];
       const s = tracer.startSpan("dot", {
         startTime,
         attributes: ss,
@@ -124,11 +127,10 @@ async function main(imageFile: string) {
   });
 }
 
-const imageFile = process.argv[2] || "hatskirt.png";
-console.log("reading image from: " + imageFile);
+const imageFile = process.argv[2] || "dontpeek.png";
 
 main(imageFile);
-console.log("did some stuff");
+console.log("pausing to send buffered spans...");
 
 // TODO: print a link to the environment
 // TODO: send them from the left rather than from the top
