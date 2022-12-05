@@ -115,11 +115,12 @@ async function main(imageFile: string) {
 
 const imageFile = process.argv[2] || "dontpeek.png";
 
-main(imageFile);
-console.log("Pausing to send buffered spans...");
+main(imageFile).then(() => {
+  console.log("Pausing to send buffered spans...");
 
-// TODO: print a link to the environment
-// TODO: send them from the left rather than from the top
-sdk.shutdown();
+  // TODO: print a link to the environment
+  // TODO: send them from the left rather than from the top
+  sdk.shutdown();
 
-setTimeout(() => console.log("hopefully they've all been sent"), 20000);
+  setTimeout(() => console.log("hopefully they've all been sent"), 20000);
+});
