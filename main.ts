@@ -24,7 +24,7 @@ const Granularity: Seconds = 5;
 function approximateColorByNumberOfSpans(
   allPixels: Pixel[]
 ): (d: Pixel) => CountOfSpans {
-  const bluenesses = allPixels.map((p) => p.color.blue);
+  const bluenesses = allPixels.map((p) => 255 - p.color.blue);
   const maxBlueness = Math.max(...bluenesses);
   const bluenessWidth = maxBlueness - Math.min(...bluenesses);
   if (bluenessWidth === 0) {
@@ -36,7 +36,9 @@ function approximateColorByNumberOfSpans(
     bluenessWidth === 0 ? 1 : (maxSpansAtOnePoint - 1) / bluenessWidth;
   return (p: Pixel) =>
     maxSpansAtOnePoint -
-    Math.round((maxBlueness - p.color.blue) * increaseInSpansPerBlueness);
+    Math.round(
+      (maxBlueness - (255 - p.color.blue)) * increaseInSpansPerBlueness
+    );
 }
 
 type RowInPng = number; // distance from the top of the png, in pixels. Int
