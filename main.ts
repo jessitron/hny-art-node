@@ -23,7 +23,7 @@ const Granularity: Seconds = 5;
 
 function approximateColorByNumberOfSpans(
   allPixels: Pixel[]
-): (d: Darkness) => CountOfSpans {
+): (d: Pixel) => CountOfSpans {
   const bluenesses = allPixels.map((p) => p.color.blue);
   const maxBlueness = Math.max(...bluenesses);
   const bluenessWidth = maxBlueness - Math.min(...bluenesses);
@@ -34,9 +34,9 @@ function approximateColorByNumberOfSpans(
   const maxSpansAtOnePoint = 10.0;
   const increaseInSpansPerBlueness =
     bluenessWidth === 0 ? 1 : (maxSpansAtOnePoint - 1) / bluenessWidth;
-  return (b: Darkness) =>
+  return (p: Pixel) =>
     maxSpansAtOnePoint -
-    Math.round((maxBlueness - b) * increaseInSpansPerBlueness);
+    Math.round((maxBlueness - p.color.blue) * increaseInSpansPerBlueness);
 }
 
 type RowInPng = number; // distance from the top of the png, in pixels. Int
@@ -78,13 +78,13 @@ async function main(imageFile: string) {
   const pixels = readImage(imageFile);
   const visiblePixels = pixels.all().filter((p) => p.color.darkness() > 0);
 
-  const spansForBlueness = approximateColorByNumberOfSpans(visiblePixels);
+  const spansForColor = approximateColorByNumberOfSpans(visiblePixels);
   const heatmapHeight = placeVerticallyInBuckets(visiblePixels, pixels.height);
 
   // turn each pixel into some spans
   const spanSpecs: SpanSpec[] = visiblePixels
     .map((p) => {
-      const spans_at_once = spansForBlueness(p.color.blue);
+      const spans_at_once = spansForColor(p);
       return Array(spans_at_once)
         .fill(0)
         .map((_) => ({
