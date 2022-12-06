@@ -1,5 +1,6 @@
 import { sdk } from "./tracing";
 import { Darkness, Pixel, Pixels, readImage } from "./image";
+import { populateAttributes } from "./attributes";
 
 import otel from "@opentelemetry/api";
 import { findLinkToDataset } from "./honeyApi";
@@ -83,11 +84,12 @@ async function main(imageFile: string) {
   // turn each pixel into some spans
   const spanSpecs: SpanSpec[] = visiblePixels
     .map((p) => {
-      const spans_at_once = spansForBlueness(p.color.darkness());
+      const spans_at_once = spansForBlueness(p.color.blue);
       return Array(spans_at_once)
         .fill(0)
         .map((_) => ({
           ...p.asFlatJson(), // add all the fields, for observability ;-)
+          ...populateAttributes(p),
           time_delta: p.location.x - pixels.width,
           height: heatmapHeight(p.location.y), // make it noninteger, so hny knows this is a float field
           spans_at_once,
