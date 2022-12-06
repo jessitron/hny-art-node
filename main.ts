@@ -24,7 +24,7 @@ const Granularity: Seconds = 5;
 function approximateColorByNumberOfSpans(
   allPixels: Pixel[]
 ): (d: Darkness) => CountOfSpans {
-  const bluenesses = allPixels.map((p) => p.color.darkness());
+  const bluenesses = allPixels.map((p) => p.color.blue);
   const maxBlueness = Math.max(...bluenesses);
   const bluenessWidth = maxBlueness - Math.min(...bluenesses);
   if (bluenessWidth === 0) {
@@ -104,7 +104,7 @@ async function main(imageFile: string) {
   // the root span has no height, so it doesn't appear in the heatmap
   tracer.startActiveSpan("Once upon a time", (rootSpan) => {
     // create all the spans for the picture
-    spanSpecs.forEach((ss) => {
+    spanSpecs.sort(byTime).forEach((ss) => {
       const s = tracer.startSpan("dot", {
         startTime: placeHorizontallyInBucket(begin, ss.time_delta),
         attributes: ss,
@@ -116,6 +116,9 @@ async function main(imageFile: string) {
   });
 }
 
+const byTime = function (ss1: SpanSpec, ss2: SpanSpec) {
+  return ss2.time_delta - ss1.time_delta;
+};
 const imageFile = process.argv[2] || "dontpeek.png";
 
 main(imageFile).then(async () => {
