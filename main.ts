@@ -2,6 +2,7 @@ import { sdk } from "./tracing";
 import { Darkness, Pixel, Pixels, readImage } from "./image";
 
 import otel from "@opentelemetry/api";
+import { findLinkToDataset } from "./honeyApi";
 const tracer = otel.trace.getTracer("i did this on purpose");
 
 console.log("Greetings! Here we go...");
@@ -115,8 +116,13 @@ async function main(imageFile: string) {
 
 const imageFile = process.argv[2] || "dontpeek.png";
 
-main(imageFile).then(() => {
+main(imageFile).then(async () => {
   console.log("Pausing to send buffered spans...");
+
+  const link = await findLinkToDataset();
+  if (link) {
+    console.log("Run a new query for HEATMAP(height) in this dataset: " + link);
+  }
 
   // TODO: print a link to the environment
   // TODO: send them from the left rather than from the top
