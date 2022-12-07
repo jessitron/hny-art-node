@@ -8,7 +8,7 @@ In the process, learn some tricks about Honeycomb.
 
 ## You will need
 
-A Honeycomb account. Get a free one [here](https://honeycomb.io/signup)), or use an existing one.
+A Honeycomb account. Get a free one [here](https://honeycomb.io/signup), or use an existing one ([concerns?](#use-an-existing-account)).
 
 ## How to do it
 
@@ -159,5 +159,29 @@ In real life, if your heatmap shows latency, and you're grouping on user_id,
 then hovering over rows might reveal that response times are much slower for a few particular users.
 
 ...
+
+## Use an Existing Account
+
+If you create the picture in a shared Honeycomb account, then your friends can see it too!
+You can link to the visualization and have it show up in Slack - super cute!
+
+Send this data to a development environment. Don't use your production environment's API key.
+
+#### If I run this program to send events to your work Honeycomb instance, will it use up my event quota?
+
+This program will send a few thousand events each time you run it. A free Honeycomb account has a limit of 20 million
+events per month. Paid Honeycomb account quotas range from hundreds of millions to billions of events per month.
+
+So, you might use 0.0001% of a paid monthly quota. It should be fine.
+
+#### Will this create a dataset that hangs out forever?
+
+It will make a dataset that stays around until you delete it.
+When you take down the Christmas decorations, [delete](https://docs.honeycomb.io/working-with-your-data/settings/#delete-1) this dataset.
+
+To do this, be a team owner (or pair with one). Be in the development environment that you sent data to.
+Choose "Datasets" on the left nav. Then click the name of the dataset, like "viz-art" or whatever yours is called.
+This opens dataset settings. From here, one of the tabs at the top says "Delete." This tab has the button you want.
+
 
 ## Delete the dataset

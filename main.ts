@@ -104,10 +104,10 @@ async function main(imageFile: string) {
   const begin: SecondsSinceEpoch = Date.now() / 1000;
 
   // the root span has no height, so it doesn't appear in the heatmap
-  tracer.startActiveSpan("Once upon a time", (rootSpan) => {
+  tracer.startActiveSpan("Deck the halls with boughs of holly", (rootSpan) => {
     // create all the spans for the picture
     spanSpecs.sort(byTime).forEach((ss) => {
-      const s = tracer.startSpan("dot", {
+      const s = tracer.startSpan("la", {
         startTime: placeHorizontallyInBucket(begin, ss.time_delta),
         attributes: ss,
       });
