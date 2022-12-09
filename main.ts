@@ -15,8 +15,19 @@ const tracer = otel.trace.getTracer("viz-art");
 
 console.log("Greetings! Here we go...");
 
+const greeting = ` _________________ 
+< Happy O11ydays! >
+ ----------------- 
+        \\   ^__^
+         \\  (oo)\\_______
+            (__)\\       )\\/\\
+                ||----w |
+                ||     ||
+`;
+
 async function main(imageFile: string) {
   await sdk.start();
+  console.log(greeting);
 
   const pixels = readImage(imageFile);
   console.log(`Read ${pixels.width}x${pixels.height} image from ${imageFile}`);
