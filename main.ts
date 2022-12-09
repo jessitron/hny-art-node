@@ -9,7 +9,7 @@ import {
   placeHorizontallyInBucket,
   placeVerticallyInBuckets,
   SecondsSinceEpoch,
-  SpanSpec,
+  HeatmapSpanSpec,
 } from "./heatmap";
 const tracer = otel.trace.getTracer("i did this on purpose");
 
@@ -23,7 +23,7 @@ async function main(imageFile: string) {
   const spansForColor = approximateColorByNumberOfSpans(visiblePixels);
   const heatmapHeight = placeVerticallyInBuckets(visiblePixels, pixels.height);
 
-  type NewType = SpanSpec;
+  type NewType = HeatmapSpanSpec;
 
   // turn each pixel into some spans
   const spanSpecs: NewType[] = visiblePixels
@@ -60,7 +60,7 @@ async function main(imageFile: string) {
   });
 }
 
-const byTime = function (ss1: SpanSpec, ss2: SpanSpec) {
+const byTime = function (ss1: HeatmapSpanSpec, ss2: HeatmapSpanSpec) {
   return ss2.time_delta - ss1.time_delta;
 };
 const imageFile = process.argv[2] || "dontpeek.png";
