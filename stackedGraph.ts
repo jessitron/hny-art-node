@@ -1,4 +1,4 @@
-import { readImage } from "./image";
+import { Pixel, readImage } from "./image";
 
 type StackSpec = {
   houseHeight: number;
@@ -27,9 +27,15 @@ function onlyUnique<T>(value: T, index: number, self: T[]): boolean {
   return self.indexOf(value) === index;
 }
 
+function objectMap<V, V2>(
+  obj: Record<string, V>,
+  fn: (v: V) => V2
+): Record<string, V2> {
+  return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, fn(v)]));
+}
+
 function readSpecsFromImage(filename: string) {
   const pixels = readImage(filename);
-  const bottomOfPicture = pixels.height; // y goes from 0 at top to height at bottom
   const visible = pixels.all().filter((p) => p.color.darkness() > 0);
 
   // give me the top height (min YLoc) of each color, in each column
@@ -37,6 +43,9 @@ function readSpecsFromImage(filename: string) {
   type ColorKey = string;
   type YLoc = number;
   type ColorsbyColumn = Record<XLoc, Record<ColorKey, YLoc>>;
+  const distanceFromBottom = function (p: Pixel) {
+    return pixels.height - p.location.y;
+  };
   const colorsByColumn = visible.reduce((cbc, p) => {
     const colorKey = p.color.toString();
     if (!cbc[p.location.x]) {
@@ -45,31 +54,53 @@ function readSpecsFromImage(filename: string) {
     }
     if (!cbc[p.location.x][colorKey]) {
       // initialize
-      cbc[p.location.x][colorKey] = bottomOfPicture;
+      cbc[p.location.x][colorKey] = 0;
     }
-    if (cbc[p.location.x][colorKey] > p.location.y) {
+    if (cbc[p.location.x][colorKey] < distanceFromBottom(p)) {
       // compare
-      cbc[p.location.x][colorKey] = p.location.y;
+      cbc[p.location.x][colorKey] = distanceFromBottom(p);
     }
     return cbc;
   }, {} as ColorsbyColumn);
-  const columns = visible.map((p) => p.location.x);
 
+  console.log("COlors by columns: " + JSON.stringify(colorsByColumn));
   const distanceFromRight = function (x: XLoc) {
     return x - pixels.width;
   };
-  const distanceFromBottom = function (y: YLoc) {
-    return pixels.height - y;
-  };
-  const specs = Object.entries(colorsByColumn)
-    .map(([x, heightByColor]) =>
-      Object.entries(heightByColor).map(([colorKey, y]) => ({ x, y, colorKey }))
+
+  const colorAndHeightByColumn: Record<
+    XLoc,
+    Array<[ColorKey, YLoc]>
+  > = objectMap(colorsByColumn, (heightByColor) => {
+    const pairs: Array<[ColorKey, YLoc]> = Object.entries(heightByColor);
+    const ascendingHeight = pairs.sort((a, b) => a[1] - b[1]);
+    console.log("pairs: " + JSON.stringify(ascendingHeight));
+    for (var i = ascendingHeight.length - 1; i > 0; i--) {
+      console.log(
+        "This one: " + JSON.stringify(ascendingHeight[i]) + " at " + i
+      );
+      const heightOfThisColor = ascendingHeight[i][1];
+      const heightOfNextColorDown = ascendingHeight[i - 1][1];
+      const heightOfThisColorInAStackedGraph =
+        heightOfThisColor - heightOfNextColorDown;
+      ascendingHeight[i][1] = heightOfThisColorInAStackedGraph;
+    }
+    return ascendingHeight;
+  });
+
+  console.log(
+    "Color and height by column: " + JSON.stringify(colorAndHeightByColumn)
+  );
+
+  const specs = Object.entries(colorAndHeightByColumn)
+    .map(([x, colorsAndHeights]) =>
+      colorsAndHeights.map(([colorKey, y]) => ({ x, y, colorKey }))
     )
     .flat()
     .map((s) => ({
       // this is the klugey bit
       time_delta: distanceFromRight(parseInt(s.x)),
-      houseHeight: distanceFromBottom(s.y),
+      houseHeight: s.y,
       houseGroup: s.colorKey,
     }));
 
