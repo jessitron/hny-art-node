@@ -1,0 +1,104 @@
+[
+  {
+    "colorKey": "#222466",
+    "stackGroup": ""
+  },
+  {
+    "colorKey": "#971587",
+    "stackGroup": ""
+  },
+  {
+    "colorKey": "#C4152F",
+    "stackGroup": ""
+  },
+  {
+    "colorKey": "#152FC4",
+    "stackGroup": ""
+  },
+  {
+    "colorKey": "#C66A22",
+    "stackGroup": ""
+  },
+  {
+    "colorKey": "#98CACB",
+    "stackGroup": ""
+  },
+  {
+    "colorKey": "#58DE12",
+    "stackGroup": ""
+  },
+  {
+    "colorKey": "#4A2129",
+    "stackGroup": ""
+  },
+  {
+    "colorKey": "#C4BC15",
+    "stackGroup": ""
+  }
+]
+WARNING: 4 stack spec at -2 unused. You'll be missing a #222466 and a #971587 and a #C4152F and a #152FC4
+WARNING: 4 stack spec at -1 unused. You'll be missing a #222466 and a #971587 and a #C4152F and a #152FC4
+Sending 3333 spans...
+We did it! The trace ID is: 3dcecd3e1feb7d67cc187ddc147bef8f
+Run a new query for HEATMAP(height) in this dataset: https://ui.honeycomb.io/modernity/environments/lizard/datasets/hny-art-node
+(Pausing to send buffered spans...
+^C[main !*] hny-art-node $ touch stackKey.json
+[main !?*] hny-art-node $ code stackKey.json 
+[main !?*] hny-art-node $ ./run
+Hello from .env
+
+> hny-art-node@1.0.0 start
+> tsc && node main.js
+
+JESS WAS HERE src
+JESS Headers: {"x-honeycomb-team":"9dFBt5Dfcx0eJ32gdXSqQD"}
+JESS WAS HERE
+Exporter "otlp" requested through environment variable is unavailable.
+ _________________ 
+< Happy O11ydays! >
+ ----------------- 
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+Read 100x50 image from dontpeek.png
+[
+  {
+    "colorKey": "#222466",
+    "stackGroup": "stump"
+  },
+  {
+    "colorKey": "#4A2129",
+    "stackGroup": "background"
+  },
+  {
+    "colorKey": "#C66A22",
+    "stackGroup": "tree"
+  },
+  {
+    "colorKey": "#971587",
+    "stackGroup": "background"
+  },
+  {
+    "colorKey": "#98CACB",
+    "stackGroup": "tree"
+  },
+  {
+    "colorKey": "#C4152F",
+    "stackGroup": "background"
+  },
+  {
+    "colorKey": "#58DE12",
+    "stackGroup": "tree"
+  },
+  {
+    "colorKey": "#152FC4",
+    "stackGroup": "background"
+  },
+  {
+    "colorKey": "#C4BC15",
+    "stackGroup": "star"
+  }
+]

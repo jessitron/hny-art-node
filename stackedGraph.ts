@@ -72,9 +72,6 @@ function readSpecsFromImage(filename: string) {
     const pairs: Array<[ColorKey, YLoc]> = Object.entries(heightByColor);
     const ascendingHeight = pairs.sort((a, b) => a[1] - b[1]);
     for (var i = ascendingHeight.length - 1; i > 0; i--) {
-      console.log(
-        "This one: " + JSON.stringify(ascendingHeight[i]) + " at " + i
-      );
       const heightOfThisColor = ascendingHeight[i][1];
       const heightOfNextColorDown = ascendingHeight[i - 1][1];
       const heightOfThisColorInAStackedGraph =
@@ -175,6 +172,8 @@ function determineOrdering<T>(knownOrderings: T[][]): T[] {
       onlyExistsAtGroundLevel(orderingsToLookAt)
     );
     if (bottomColors.length === 0) {
+      console.log("Colors remaining: " + JSON.stringify(remainingColors));
+      console.log("Orderings: " + JSON.stringify(orderingsToLookAt));
       throw new Error(
         "Oh no, can't find any colors that exist only on the bottom, infinite loop"
       );
@@ -187,6 +186,14 @@ function determineOrdering<T>(knownOrderings: T[][]): T[] {
     );
     var remainingColors = orderingsToLookAt.flat().filter(onlyUnique);
   }
+  // this is useful for creating a key
+  console.log(
+    JSON.stringify(
+      bottomToTop.map((c) => ({ colorKey: c, stackGroup: "" })),
+      null,
+      2
+    )
+  );
 
   return bottomToTop;
 }
