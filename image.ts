@@ -33,9 +33,10 @@ export class Color {
 
   // usable for comparison
   public toString() {
-    return `${this.red.toString(16)}${this.green.toString(
+    const alphaPart = this.alpha === 255 ? "" : `:${this.alpha.toString(16)}`;
+    return `#${this.red.toString(16)}${this.green.toString(
       16
-    )}${this.blue.toString(16)}:${this.alpha.toString(16)}`;
+    )}${this.blue.toString(16)}${alphaPart}`.toUpperCase();
   }
 }
 

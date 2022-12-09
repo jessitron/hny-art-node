@@ -257,3 +257,4 @@ export function addStackedGraphAttributes<T extends EnoughOfASpanSpec>(
 
   return spanSpecs;
 }
+
