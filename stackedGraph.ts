@@ -123,19 +123,43 @@ function countByTimeDelta<T extends EnoughOfASpanSpec>(
   }, {} as Record<string, T[]>);
 }
 
-export function addStackedGraphAttributes(spanSpecs: EnoughOfASpanSpec[]) {
-  const stackSpecCountByDelta = countByTimeDelta(stackSpec);
-  const spanSpecCountByDelta = countByTimeDelta(spanSpecs);
+type PossibleStackSpec = { houseHeight?: number; houseGroup?: string };
+export function addStackedGraphAttributes<T extends EnoughOfASpanSpec>(
+  spanSpecs: T[]
+): Array<T & PossibleStackSpec> {
+  var stackSpecCountByDelta = countByTimeDelta(stackSpec); // the array reference won't be mutated but its contents will be
 
+  const withStackSpecs = spanSpecs.map((ss) => {
+    // do we have a need for a stack spec at this time?
+    const stackSpecForThisTime = stackSpecCountByDelta[ss.time_delta]?.pop();
+    if (stackSpecForThisTime) {
+      return { ...ss, ...stackSpecForThisTime };
+    } else {
+      return ss;
+    }
+  });
+
+  // warn if we missed any
+  Object.values(stackSpecCountByDelta)
+    .filter((ss) => ss.length > 0)
+    .forEach((missedSpecs) => {
+      console.log(
+        `WARNING: ${missedSpecs.length} stack spec at ${
+          missedSpecs[0].time_delta
+        } unused. You'll be missing a ${missedSpecs
+          .map((ss) => ss.houseGroup)
+          .join(" and a ")}`
+      );
+    });
+  return withStackSpecs;
+
+  const spanSpecCountByDelta = countByTimeDelta(spanSpecs);
   Object.keys(stackSpecCountByDelta).forEach((k) => {
     console.log("For stacks at " + k);
     console.log(
       "There are " + stackSpecCountByDelta[k].length + " stack specs then"
     );
     console.log("There are " + spanSpecCountByDelta[k].length + " spans then");
-    if (spanSpecCountByDelta[k] < stackSpecCountByDelta[k]) {
-      console.log("WARNING: insufficient spans at time " + k);
-    }
   });
 
   return spanSpecs;

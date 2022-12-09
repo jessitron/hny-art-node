@@ -53,7 +53,7 @@ function planSpans(pixels: Pixels): SpanSpec[] {
   const heatmapHeight = placeVerticallyInBuckets(visiblePixels, pixels.height);
 
   // turn each pixel into some spans
-  const spanSpecs = visiblePixels
+  const heatmapSpanSpecs = visiblePixels
     .map((p) => {
       const spans_at_once = spansForColor(p);
       return Array(spans_at_once)
@@ -68,7 +68,7 @@ function planSpans(pixels: Pixels): SpanSpec[] {
     })
     .flat();
 
-  addStackedGraphAttributes(spanSpecs);
+  const spanSpecs = addStackedGraphAttributes(heatmapSpanSpecs);
 
   return spanSpecs;
 }
