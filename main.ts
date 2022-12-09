@@ -1,6 +1,6 @@
 import { sdk } from "./tracing";
 import { Darkness, Pixel, Pixels, readImage } from "./image";
-import { populateAttributes } from "./attributes";
+import { populateAttributes } from "./bubbleUp";
 
 import otel from "@opentelemetry/api";
 import { findLinkToDataset } from "./honeyApi";
@@ -23,10 +23,8 @@ async function main(imageFile: string) {
   const spansForColor = approximateColorByNumberOfSpans(visiblePixels);
   const heatmapHeight = placeVerticallyInBuckets(visiblePixels, pixels.height);
 
-  type NewType = HeatmapSpanSpec;
-
   // turn each pixel into some spans
-  const spanSpecs: NewType[] = visiblePixels
+  const spanSpecs: HeatmapSpanSpec[] = visiblePixels
     .map((p) => {
       const spans_at_once = spansForColor(p);
       return Array(spans_at_once)
