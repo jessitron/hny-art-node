@@ -56,7 +56,7 @@ function planSpans(pixels: Pixels): SpanSpec[] {
     .map((p) => {
       const spans_at_once = spansForColor(p);
       return Array(spans_at_once)
-        .fill(0)
+        .fill({})
         .map((_) => ({
           ...p.asFlatJson(), // add all the fields, for observability ;-)
           spans_at_once,
