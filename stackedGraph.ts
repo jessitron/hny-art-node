@@ -38,7 +38,7 @@ function readSpecsFromImage(filename: string) {
   const pixels = readImage(filename);
   const visible = pixels.all().filter((p) => p.color.darkness() > 0);
 
-  // give me the top height (min YLoc) of each color, in each column
+  // give me the top height of each color, in each column
   type XLoc = number;
   type ColorKey = string;
   type YLoc = number;
@@ -63,11 +63,8 @@ function readSpecsFromImage(filename: string) {
     return cbc;
   }, {} as ColorsbyColumn);
 
-  console.log("COlors by columns: " + JSON.stringify(colorsByColumn));
-  const distanceFromRight = function (x: XLoc) {
-    return x - pixels.width;
-  };
-
+  // we want only the DIFFERENCE in height between colors, to make a stacked graph.
+  // this also gives us the colors and heights in order, bottom to top. That's important.
   const colorAndHeightByColumn: Record<
     XLoc,
     Array<[ColorKey, YLoc]>
@@ -88,17 +85,19 @@ function readSpecsFromImage(filename: string) {
     return ascendingHeight;
   });
 
+  // which colors need to be on the bottom? We need an ordering
   const colorsInOrderPerColumn: ColorKey[][] = Object.values(
     colorAndHeightByColumn
-  ).map((chs) => chs.map(([color, height]) => color));
+  ).map((chs) => chs.map(([color, _height]) => color));
   const orderOfColors: ColorKey[] = determineOrdering(colorsInOrderPerColumn);
   function stackSort(color: ColorKey) {
     return orderOfColors.indexOf(color);
   }
 
-  console.log(
-    "Color and height by column: " + JSON.stringify(colorAndHeightByColumn)
-  );
+  // Now put them in the format to be combined with SpanSpecs
+  const distanceFromRight = function (x: XLoc) {
+    return x - pixels.width;
+  };
 
   const specs = Object.entries(colorAndHeightByColumn)
     .map(([x, colorsAndHeights]) =>
@@ -106,7 +105,8 @@ function readSpecsFromImage(filename: string) {
     )
     .flat()
     .map((s) => ({
-      // this is the klugey bit
+      // this is the klugey bit, make its format match the spanSpec we have
+      // (no really, the rest of this program is CLEVER)
       time_delta: distanceFromRight(parseInt(s.x)),
       houseHeight: s.y,
       houseGroup: s.colorKey,
@@ -116,103 +116,7 @@ function readSpecsFromImage(filename: string) {
   return specs;
 }
 
-const stackSpec: StackSpec[] = [
-  {
-    time_delta: -22,
-    houseHeight: 0,
-    houseGroup: "chimney",
-  },
-  {
-    time_delta: -21,
-    houseHeight: 10,
-    houseGroup: "chimney",
-  },
-  {
-    time_delta: -20,
-    houseHeight: 10 - 8,
-    houseGroup: "chimney",
-  },
-  {
-    time_delta: -19,
-    houseHeight: 0,
-    houseGroup: "chimney",
-  },
-  {
-    time_delta: -21,
-    houseHeight: 0,
-    houseGroup: "house",
-  },
-  {
-    time_delta: -20,
-    houseHeight: 8,
-    houseGroup: "house",
-  },
-  {
-    time_delta: -19,
-    houseHeight: 9,
-    houseGroup: "house",
-  },
-  {
-    time_delta: -18,
-    houseHeight: 10 - 4,
-    houseGroup: "house",
-  },
-  {
-    time_delta: -17,
-    houseHeight: 11 - 4,
-    houseGroup: "house",
-  },
-  {
-    time_delta: -16,
-    houseHeight: 12,
-    houseGroup: "house",
-  },
-  {
-    time_delta: -15,
-    houseHeight: 11,
-    houseGroup: "house",
-  },
-  {
-    time_delta: -14,
-    houseHeight: 10,
-    houseGroup: "house",
-  },
-  {
-    time_delta: -13,
-    houseHeight: 9,
-    houseGroup: "house",
-  },
-  {
-    time_delta: -12,
-    houseHeight: 8.5,
-    houseGroup: "house",
-  },
-  {
-    time_delta: -11,
-    houseHeight: 8,
-    houseGroup: "house",
-  },
-  {
-    time_delta: -10,
-    houseHeight: 0,
-    houseGroup: "house",
-  },
-  {
-    time_delta: -18,
-    houseHeight: 4,
-    houseGroup: "portal",
-  },
-  {
-    time_delta: -17,
-    houseHeight: 4,
-    houseGroup: "portal",
-  },
-].map((v) => ({ ...v, iteration: "our" }));
-
-// I want to know whether there are enough SpanSpecs to hold our StackSpecs
-
-type EnoughOfASpanSpec = { time_delta: number };
-function countByTimeDelta<T extends EnoughOfASpanSpec>(
+function groupByTimeDelta<T extends EnoughOfASpanSpec>(
   ss: T[]
 ): Record<string, T[]> {
   return ss.reduce((p, c) => {
@@ -225,11 +129,12 @@ function countByTimeDelta<T extends EnoughOfASpanSpec>(
   }, {} as Record<string, T[]>);
 }
 
+type EnoughOfASpanSpec = { time_delta: number };
 type PossibleStackSpec = { houseHeight?: number; houseGroup?: string };
 export function addStackedGraphAttributes<T extends EnoughOfASpanSpec>(
   spanSpecs: T[]
 ): Array<T & PossibleStackSpec> {
-  var stackSpecCountByDelta = countByTimeDelta(readSpecsFromImage("house.png")); // the array reference won't be mutated but its contents will be
+  var stackSpecCountByDelta = groupByTimeDelta(readSpecsFromImage("house.png")); // the array reference won't be mutated but its contents will be
 
   const withStackSpecs = spanSpecs.map((ss) => {
     // do we have a need for a stack spec at this time?
@@ -254,40 +159,25 @@ export function addStackedGraphAttributes<T extends EnoughOfASpanSpec>(
       );
     });
   return withStackSpecs;
-
-  const spanSpecCountByDelta = countByTimeDelta(spanSpecs);
-  Object.keys(stackSpecCountByDelta).forEach((k) => {
-    console.log("For stacks at " + k);
-    console.log(
-      "There are " + stackSpecCountByDelta[k].length + " stack specs then"
-    );
-    console.log("There are " + spanSpecCountByDelta[k].length + " spans then");
-  });
-
-  return spanSpecs;
 }
 
+// given lists of colors in each column (in order from bottom to top), return a single list of colors in order.
 function determineOrdering<T>(knownOrderings: T[][]): T[] {
   var orderingsToLookAt = knownOrderings;
   var remainingColors = orderingsToLookAt.flat().filter(onlyUnique);
-
   var bottomToTop = [];
 
   const onlyExistsAtGroundLevel = (orderings: T[][]) => (v: T) =>
     Math.max(...orderings.map((o) => o.lastIndexOf(v))) === 0;
 
   while (remainingColors.length > 0) {
-    console.log("Remaining colors: " + JSON.stringify(remainingColors));
-    console.log(
-      "Orderings to look at: " + JSON.stringify(orderingsToLookAt, null, 2)
-    );
-    // find th bottom ones
+    // find the bottom ones
     const bottomColors = remainingColors.filter(
       onlyExistsAtGroundLevel(orderingsToLookAt)
     );
     if (bottomColors.length === 0) {
       throw new Error(
-        "Oh no, can't find any colors that exist only on the bottom"
+        "Oh no, can't find any colors that exist only on the bottom, infinite loop"
       );
     }
     // put them next in the ordering
