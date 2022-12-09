@@ -4,6 +4,23 @@ type StackSpec = {
   houseGroup: string;
 };
 
+// type TimeDelta = number;
+// const chimney = { name: "chimney", heights: [0, 10, 10, 0], startingAt: -22 };
+// const house = {
+//   name: "house",
+//   heights: [0, 8, 9, 10, 11, 12, 11, 10, 9, 8.5, 8, 0],
+//   startingAt: -21,
+// };
+// const door = { name: "portal", heights: [0, 4, 4, 0], startingAt: -19 };
+
+// function buildSpecs() {
+//   const columns = {} as Record<TimeDelta, Array<StackSpec>>;
+
+//   const rect = chimney;
+//   const timeDelta = rect.startingAt;
+//   rect.heights.map(h => { })
+// }
+
 const stackSpec: StackSpec[] = [
   {
     time_delta: -22,
@@ -86,11 +103,6 @@ const stackSpec: StackSpec[] = [
     houseGroup: "house",
   },
   {
-    time_delta: -19,
-    houseHeight: 0,
-    houseGroup: "portal",
-  },
-  {
     time_delta: -18,
     houseHeight: 4,
     houseGroup: "portal",
@@ -98,11 +110,6 @@ const stackSpec: StackSpec[] = [
   {
     time_delta: -17,
     houseHeight: 4,
-    houseGroup: "portal",
-  },
-  {
-    time_delta: -16,
-    houseHeight: 0,
     houseGroup: "portal",
   },
 ].map((v) => ({ ...v, iteration: "our" }));
