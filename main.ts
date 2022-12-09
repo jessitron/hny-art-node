@@ -11,6 +11,7 @@ import {
   SecondsSinceEpoch,
   HeatmapSpanSpec,
 } from "./heatmap";
+import { addStackedGraphAttributes } from "./stackedGraph";
 
 const greeting = ` _________________ 
 < Happy O11ydays! >
@@ -66,6 +67,8 @@ function planSpans(pixels: Pixels): SpanSpec[] {
         }));
     })
     .flat();
+
+  addStackedGraphAttributes(spanSpecs);
 
   return spanSpecs;
 }
