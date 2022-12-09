@@ -1,3 +1,5 @@
+import { readImage } from "./image";
+
 type StackSpec = {
   houseHeight: number;
   time_delta: number;
@@ -20,6 +22,59 @@ type StackSpec = {
 //   const timeDelta = rect.startingAt;
 //   rect.heights.map(h => { })
 // }
+
+function onlyUnique<T>(value: T, index: number, self: T[]): boolean {
+  return self.indexOf(value) === index;
+}
+
+function readSpecsFromImage(filename: string) {
+  const pixels = readImage(filename);
+  const bottomOfPicture = pixels.height; // y goes from 0 at top to height at bottom
+  const visible = pixels.all().filter((p) => p.color.darkness() > 0);
+
+  // give me the top height (min YLoc) of each color, in each column
+  type XLoc = number;
+  type ColorKey = string;
+  type YLoc = number;
+  type ColorsbyColumn = Record<XLoc, Record<ColorKey, YLoc>>;
+  const colorsByColumn = visible.reduce((cbc, p) => {
+    const colorKey = p.color.toString();
+    if (!cbc[p.location.x]) {
+      // initialize
+      cbc[p.location.x] = {};
+    }
+    if (!cbc[p.location.x][colorKey]) {
+      // initialize
+      cbc[p.location.x][colorKey] = bottomOfPicture;
+    }
+    if (cbc[p.location.x][colorKey] > p.location.y) {
+      // compare
+      cbc[p.location.x][colorKey] = p.location.y;
+    }
+    return cbc;
+  }, {} as ColorsbyColumn);
+  const columns = visible.map((p) => p.location.x);
+
+  const distanceFromRight = function (x: XLoc) {
+    return x - pixels.width;
+  };
+  const distanceFromBottom = function (y: YLoc) {
+    return pixels.height - y;
+  };
+  const specs = Object.entries(colorsByColumn)
+    .map(([x, heightByColor]) =>
+      Object.entries(heightByColor).map(([colorKey, y]) => ({ x, y, colorKey }))
+    )
+    .flat()
+    .map((s) => ({
+      // this is the klugey bit
+      time_delta: distanceFromRight(parseInt(s.x)),
+      houseHeight: distanceFromBottom(s.y),
+      houseGroup: s.colorKey,
+    }));
+
+  return specs;
+}
 
 const stackSpec: StackSpec[] = [
   {
@@ -134,7 +189,7 @@ type PossibleStackSpec = { houseHeight?: number; houseGroup?: string };
 export function addStackedGraphAttributes<T extends EnoughOfASpanSpec>(
   spanSpecs: T[]
 ): Array<T & PossibleStackSpec> {
-  var stackSpecCountByDelta = countByTimeDelta(stackSpec); // the array reference won't be mutated but its contents will be
+  var stackSpecCountByDelta = countByTimeDelta(readSpecsFromImage("house.png")); // the array reference won't be mutated but its contents will be
 
   const withStackSpecs = spanSpecs.map((ss) => {
     // do we have a need for a stack spec at this time?

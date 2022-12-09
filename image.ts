@@ -30,6 +30,13 @@ export class Color {
       (this.alpha / 255.0)
     );
   }
+
+  // usable for comparison
+  public toString() {
+    return `${this.red.toString(16)}${this.green.toString(
+      16
+    )}${this.blue.toString(16)}:${this.alpha.toString(16)}`;
+  }
 }
 
 export class Pixel {
