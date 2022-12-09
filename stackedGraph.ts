@@ -88,6 +88,14 @@ function readSpecsFromImage(filename: string) {
     return ascendingHeight;
   });
 
+  const colorsInOrderPerColumn: ColorKey[][] = Object.values(
+    colorAndHeightByColumn
+  ).map((chs) => chs.map(([color, height]) => color));
+  const orderOfColors: ColorKey[] = determineOrdering(colorsInOrderPerColumn);
+  function stackSort(color: ColorKey) {
+    return orderOfColors.indexOf(color);
+  }
+
   console.log(
     "Color and height by column: " + JSON.stringify(colorAndHeightByColumn)
   );
@@ -102,6 +110,7 @@ function readSpecsFromImage(filename: string) {
       time_delta: distanceFromRight(parseInt(s.x)),
       houseHeight: s.y,
       houseGroup: s.colorKey,
+      stackSort: stackSort(s.colorKey),
     }));
 
   return specs;
@@ -258,3 +267,37 @@ export function addStackedGraphAttributes<T extends EnoughOfASpanSpec>(
   return spanSpecs;
 }
 
+function determineOrdering<T>(knownOrderings: T[][]): T[] {
+  var orderingsToLookAt = knownOrderings;
+  var remainingColors = orderingsToLookAt.flat().filter(onlyUnique);
+
+  var bottomToTop = [];
+
+  const onlyExistsAtGroundLevel = (orderings: T[][]) => (v: T) =>
+    Math.max(...orderings.map((o) => o.lastIndexOf(v))) === 0;
+
+  while (remainingColors.length > 0) {
+    console.log("Remaining colors: " + JSON.stringify(remainingColors));
+    console.log(
+      "Orderings to look at: " + JSON.stringify(orderingsToLookAt, null, 2)
+    );
+    // find th bottom ones
+    const bottomColors = remainingColors.filter(
+      onlyExistsAtGroundLevel(orderingsToLookAt)
+    );
+    if (bottomColors.length === 0) {
+      throw new Error(
+        "Oh no, can't find any colors that exist only on the bottom"
+      );
+    }
+    // put them next in the ordering
+    bottomToTop.push(...bottomColors);
+    // remove them from the input
+    orderingsToLookAt = orderingsToLookAt.map((o) =>
+      o.filter((v) => !bottomColors.includes(v))
+    );
+    var remainingColors = orderingsToLookAt.flat().filter(onlyUnique);
+  }
+
+  return bottomToTop;
+}
