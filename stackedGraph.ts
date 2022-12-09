@@ -1,27 +1,5 @@
 import { Pixel, readImage } from "./image";
-
-type StackSpec = {
-  houseHeight: number;
-  time_delta: number;
-  houseGroup: string;
-};
-
-// type TimeDelta = number;
-// const chimney = { name: "chimney", heights: [0, 10, 10, 0], startingAt: -22 };
-// const house = {
-//   name: "house",
-//   heights: [0, 8, 9, 10, 11, 12, 11, 10, 9, 8.5, 8, 0],
-//   startingAt: -21,
-// };
-// const door = { name: "portal", heights: [0, 4, 4, 0], startingAt: -19 };
-
-// function buildSpecs() {
-//   const columns = {} as Record<TimeDelta, Array<StackSpec>>;
-
-//   const rect = chimney;
-//   const timeDelta = rect.startingAt;
-//   rect.heights.map(h => { })
-// }
+import { default as stackKey } from "./stackKey.json";
 
 function onlyUnique<T>(value: T, index: number, self: T[]): boolean {
   return self.indexOf(value) === index;
@@ -95,6 +73,14 @@ function readSpecsFromImage(filename: string) {
     return x - pixels.width;
   };
 
+  function stackGroup(colorKey: ColorKey) {
+    const name =
+      stackKey.find((sk) => sk.colorKey === colorKey)?.stackGroup ||
+      "something";
+    const ordering = orderOfColors.indexOf(colorKey);
+    return `${ordering.toString(36)} + ${name}`;
+  }
+
   const specs = Object.entries(colorAndHeightByColumn)
     .map(([x, colorsAndHeights]) =>
       colorsAndHeights.map(([colorKey, y]) => ({ x, y, colorKey }))
@@ -104,9 +90,8 @@ function readSpecsFromImage(filename: string) {
       // this is the klugey bit, make its format match the spanSpec we have
       // (no really, the rest of this program is CLEVER)
       time_delta: distanceFromRight(parseInt(s.x)),
-      houseHeight: s.y,
-      houseGroup: s.colorKey,
-      stackSort: stackSort(s.colorKey),
+      stackHeight: s.y,
+      stackGroup: stackGroup(s.colorKey),
     }));
 
   return specs;
@@ -126,7 +111,7 @@ function groupByTimeDelta<T extends EnoughOfASpanSpec>(
 }
 
 type EnoughOfASpanSpec = { time_delta: number };
-type PossibleStackSpec = { houseHeight?: number; houseGroup?: string };
+type PossibleStackSpec = { stackHeight?: number; stackGroup?: string };
 export function addStackedGraphAttributes<T extends EnoughOfASpanSpec>(
   spanSpecs: T[]
 ): Array<T & PossibleStackSpec> {
@@ -150,7 +135,7 @@ export function addStackedGraphAttributes<T extends EnoughOfASpanSpec>(
         `WARNING: ${missedSpecs.length} stack spec at ${
           missedSpecs[0].time_delta
         } unused. You'll be missing a ${missedSpecs
-          .map((ss) => ss.houseGroup)
+          .map((ss) => ss.stackGroup)
           .join(" and a ")}`
       );
     });
