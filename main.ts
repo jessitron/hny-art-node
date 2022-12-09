@@ -11,9 +11,6 @@ import {
   SecondsSinceEpoch,
   HeatmapSpanSpec,
 } from "./heatmap";
-const tracer = otel.trace.getTracer("viz-art");
-
-console.log("Greetings! Here we go...");
 
 const greeting = ` _________________ 
 < Happy O11ydays! >
@@ -33,17 +30,17 @@ async function main(imageFile: string) {
   console.log(`Read ${pixels.width}x${pixels.height} image from ${imageFile}`);
 
   const spanSpecs = planSpans(pixels);
-  console.log(`Preparing to send ${spanSpecs.length} spans...`);
+  console.log(`Sending ${spanSpecs.length} spans...`);
 
   const traceId = sendSpans(spanSpecs);
-  console.log("Trace ID is: " + traceId);
+  console.log("We did it! The trace ID is: " + traceId);
 
   const link = await findLinkToDataset();
   console.log("Run a new query for HEATMAP(height) in this dataset: " + link);
 
   sdk.shutdown();
-  console.log("Pausing to send buffered spans...");
-  setTimeout(() => console.log("hopefully they've all been sent"), 20000);
+  console.log("(Pausing to send buffered spans...");
+  setTimeout(() => console.log(" hopefully they've all been sent)"), 10000);
 }
 
 type SpanSpec = HeatmapSpanSpec & Record<string, number | string>;
@@ -74,6 +71,7 @@ function planSpans(pixels: Pixels): SpanSpec[] {
 }
 
 type TraceID = string;
+const tracer = otel.trace.getTracer("viz-art");
 function sendSpans(spanSpecs: SpanSpec[]): TraceID {
   const begin: SecondsSinceEpoch = Date.now() / 1000;
   var traceId: string;
