@@ -71,7 +71,6 @@ function readSpecsFromImage(filename: string) {
   > = objectMap(colorsByColumn, (heightByColor) => {
     const pairs: Array<[ColorKey, YLoc]> = Object.entries(heightByColor);
     const ascendingHeight = pairs.sort((a, b) => a[1] - b[1]);
-    console.log("pairs: " + JSON.stringify(ascendingHeight));
     for (var i = ascendingHeight.length - 1; i > 0; i--) {
       console.log(
         "This one: " + JSON.stringify(ascendingHeight[i]) + " at " + i
